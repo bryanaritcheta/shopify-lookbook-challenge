@@ -1,24 +1,50 @@
 {% assign lookbook = section.settings.lookbook %}
 
 {% if lookbook %}
-  <p>{{ lookbook.title.value }} — Storefronts API Access: OK</p>
+  <section
+    class="lookbook section-{{ section.id }}-lookbook"
+    aria-label="Lookbook: {{ lookbook.title.value }}"
+  >
+    {%- comment -%}
+      Story 2.2 adds: {{ 'lookbook.css' | asset_url | stylesheet_tag }}
+      Story 2.3 adds: SectionBar + LookbookHero components
+      Story 2.4 adds: ProductCountBar + LookbookProductGrid + LookbookProductCard
+      Story 2.5 adds: LookbookFooter + remaining state patterns (S-02, S-04, S-05, S-10) + full accessibility
+    {%- endcomment -%}
+    <p>{{ lookbook.title.value }}</p>
+  </section>
 {% endif %}
 
 {% schema %}
 {
-  "name": "Lookbook",
+  "name": "t:sections.lookbook.name",
+  "class": "section-lookbook",
   "settings": [
     {
       "type": "metaobject",
       "id": "lookbook",
-      "label": "Lookbook",
+      "label": "t:sections.lookbook.settings.lookbook.label",
       "metaobject_type": "lookbook"
+    },
+    {
+      "type": "select",
+      "id": "heading_level",
+      "label": "t:sections.lookbook.settings.heading_level.label",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
     }
   ],
   "presets": [
     {
-      "name": "Lookbook"
+      "name": "t:sections.lookbook.presets.lookbook.name"
     }
-  ]
+  ],
+  "enabled_on": {
+    "templates": ["index", "page", "collection", "product"]
+  }
 }
 {% endschema %}
