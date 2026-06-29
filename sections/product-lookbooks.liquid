@@ -1,11 +1,112 @@
 {{ 'lookbook.css' | asset_url | stylesheet_tag }}
 
-{%- comment -%}
-  sections/product-lookbooks.liquid — Product Page Auto-Discovery
-  Detection loop (shop.metaobjects.lookbook.values, limit: 250): Story 3.2.
-  Draft exclusion (AD-5): Story 3.3.
-  250-entry ceiling: AD-2 / ADR-001.
-{%- endcomment -%}
+{%- assign heading_tag = section.settings.heading_level | default: 'h2' -%}
+
+{%- capture product_lookbooks_html -%}
+  {%- comment -%}
+    AD-2 / ADR-001: Full-scan reverse lookup — iterates all Lookbook entries (limit: 250).
+    Hard ceiling: 250 active Lookbooks. Entries beyond position 250 are silently undetected.
+    Client must be notified when approaching this ceiling.
+    Draft exclusion (AD-5): deferred to a later iteration.
+  {%- endcomment -%}
+  {%- for lb in shop.metaobjects.lookbook.values limit: 250 -%}
+    {%- assign lb_products = lb.products.value -%}
+    {%- assign product_matched = false -%}
+    {%- for lb_product in lb_products -%}
+      {%- if lb_product.id == product.id -%}
+        {%- assign product_matched = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if product_matched -%}
+      {%- assign lb_product_list = lb.products.value -%}
+      {%- assign lb_product_count = lb_product_list | size -%}
+      {%- if lb_product_count > 0 -%}
+        <section
+          class="lookbook section-{{ section.id }}-lookbook"
+          aria-label="Lookbook: {{ lb.title.value | escape }}"
+        >
+          <div class="lookbook__section-bar" aria-hidden="true">The Lookbook</div>
+
+          {%- assign hero_image = lb.hero_image.value -%}
+          {%- if hero_image -%}
+            {%- assign hero_alt = hero_image.alt | default: lb.title.value | default: '' -%}
+            <div class="lookbook__hero">
+              <img
+                src="{{ hero_image | image_url: width: 1200 }}"
+                alt="{{ hero_alt | escape }}"
+                width="{{ hero_image.width }}"
+                height="{{ hero_image.height }}"
+                loading="lazy"
+                fetchpriority="low"
+              >
+              <div class="lookbook__hero-text">
+                <span class="lookbook__hero-eyebrow">The Edit</span>
+                <{{ heading_tag }} class="lookbook__hero-title">{{ lb.title.value | escape }}</{{ heading_tag }}>
+                <span class="lookbook__hero-rule"></span>
+                {%- if lb.description.value != blank -%}
+                  <div class="lookbook__hero-description">{{ lb.description | metafield_tag }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          <div class="lookbook__count-bar">
+            <span class="lookbook__count-label">Shop the Edit</span>
+            <span class="lookbook__count-number" aria-hidden="true">
+              {%- if lb_product_count < 10 -%}0{%- endif -%}{{ lb_product_count }}
+            </span>
+          </div>
+
+          <ol class="lookbook__product-grid">
+            {%- for p in lb_product_list -%}
+              {%- capture badge_num -%}{%- if forloop.index < 10 -%}0{%- endif -%}{{ forloop.index }}{%- endcapture -%}
+              <li class="lookbook__card-item" data-index="{{ badge_num }}">
+                <a
+                  class="card-product lookbook__card-link"
+                  href="{{ p.url }}"
+                  aria-label="{{ p.title | escape }}"
+                >
+                  <div class="lookbook__card-image-col">
+                    {%- if p.featured_image -%}
+                      <img
+                        src="{{ p.featured_image | image_url: width: 600 }}"
+                        alt="{{ p.featured_image.alt | default: p.title | escape }}"
+                        width="{{ p.featured_image.width }}"
+                        height="{{ p.featured_image.height }}"
+                        loading="lazy"
+                      >
+                    {%- else -%}
+                      {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                    {%- endif -%}
+                  </div>
+                  <div class="lookbook__card-body">
+                    {%- if p.type != blank -%}
+                      <span class="lookbook__card-category">{{ p.type | upcase }}</span>
+                    {%- endif -%}
+                    <h3 class="lookbook__card-title">{{ p.title | escape }}</h3>
+                    <span class="lookbook__card-price">{{ p.price | money }}</span>
+                    <span class="lookbook__card-cta">View Product</span>
+                  </div>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ol>
+
+          <div class="lookbook__footer">
+            <span class="lookbook__footer-rule"></span>
+            <span class="lookbook__footer-label">End of Edit</span>
+            <span class="lookbook__footer-rule"></span>
+          </div>
+        </section>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- unless product_lookbooks_html == blank -%}
+  {{ product_lookbooks_html }}
+{%- endunless -%}
 
 {% schema %}
 {
