@@ -22,11 +22,12 @@
    2. LOOKBOOK SECTION CONTAINER
    ---------------------------------------------------------- */
 
+/* Width + horizontal padding are owned by the .page-width class on the
+   section element. Inner bars (section-bar, count-bar, hero, footer) carry
+   their own horizontal padding and sit flush to the page-width column edge. */
 .lookbook {
   background: var(--lookbook-surface);
-  width: 100%;
   border-radius: 0;
-  padding: 0;
 }
 
 /* ----------------------------------------------------------
@@ -188,11 +189,13 @@
 
 /* ----------------------------------------------------------
    7. LOOKBOOK PRODUCT CARD
-   Card HTML is inline in sections/lookbook.liquid.
+   Card HTML is inline in sections/product-lookbooks.liquid.
    Selectors use the .lookbook .lookbook__card-* family exclusively.
    ---------------------------------------------------------- */
 
-/* Ghost editorial index badge — reads data-index from <li> */
+/* Editorial index badge — reads data-index from <li>.
+   Solid ink chip so the number stays legible over any image background
+   (light or dark product shots alike). */
 .lookbook .lookbook__card-item {
   position: relative;
   list-style: none;
@@ -201,11 +204,13 @@
 .lookbook .lookbook__card-item::before {
   content: attr(data-index);
   position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 28px;
+  top: 0;
+  left: 0;
+  padding: 6px 10px;
+  background: var(--lookbook-ink);
+  color: var(--lookbook-white);
+  font-size: 18px;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.25);
   line-height: 1;
   z-index: 2;
   pointer-events: none;
@@ -406,9 +411,15 @@
     padding: 24px 40px;
   }
 
-  .section-lookbook .lookbook__product-grid {
+  .lookbook .lookbook__product-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .lookbook .lookbook__product-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }

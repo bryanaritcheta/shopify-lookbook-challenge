@@ -1647,6 +1647,25 @@
         },
         "heading_level": {
           "label": "Heading level"
+        },
+        "labels_header": {
+          "content": "Labels",
+          "info": "Editorial text shown around the lookbook. Leave a field blank to hide that element."
+        },
+        "label_section_bar": {
+          "label": "Top bar label"
+        },
+        "label_eyebrow": {
+          "label": "Hero eyebrow"
+        },
+        "label_shop": {
+          "label": "Product grid label"
+        },
+        "label_cta": {
+          "label": "Card button label"
+        },
+        "label_footer": {
+          "label": "Footer label"
         }
       },
       "presets": {
@@ -1656,7 +1675,28 @@
       }
     },
     "product-lookbooks": {
-      "name": "Product Lookbooks"
+      "name": "Product Lookbooks",
+      "settings": {
+        "labels_header": {
+          "content": "Labels",
+          "info": "Editorial text shown around the lookbook. Leave a field blank to hide that element."
+        },
+        "label_section_bar": {
+          "label": "Top bar label"
+        },
+        "label_eyebrow": {
+          "label": "Hero eyebrow"
+        },
+        "label_shop": {
+          "label": "Product grid label"
+        },
+        "label_cta": {
+          "label": "Card button label"
+        },
+        "label_footer": {
+          "label": "Footer label"
+        }
+      }
     },
     "main-account": {
       "name": "Account"

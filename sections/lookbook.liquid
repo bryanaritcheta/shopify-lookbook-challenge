@@ -8,36 +8,34 @@
     picker has a selection), but on the live storefront Shopify suppresses its field values —
     which would otherwise render an empty SectionBar/count shell.
 
-    Detection is context-aware to avoid a catastrophic false positive. On the live storefront
-    Shopify suppresses a draft entry's field values, so a blank title.value is a reliable draft
-    signal and an active entry always has a populated title — this never hides a live active
-    Lookbook even if published_at is NOT exposed on the store's metaobject. In design_mode all
-    field values are accessible regardless of status, so title.value cannot distinguish draft
-    from active there; published_at (nil for drafts) drives the customizer warning banner.
+    A metaobject exposes no draft/active status in Liquid (no published_at accessor — only
+    .system + its defined fields), so draft detection relies on the live-storefront field
+    suppression: a blank title.value means Shopify hid the values, i.e. the entry is draft.
+    In design_mode all field values are accessible regardless of status, so this signal is
+    unavailable there — we render the entry so it stays previewable in the customizer, and
+    let the live storefront keep drafts hidden.
   {%- endcomment -%}
   {%- assign lookbook_is_draft = false -%}
-  {%- if request.design_mode -%}
-    {%- if lookbook.published_at == blank -%}
-      {%- assign lookbook_is_draft = true -%}
-    {%- endif -%}
-  {%- else -%}
+  {%- unless request.design_mode -%}
     {%- if lookbook.title.value == blank -%}
       {%- assign lookbook_is_draft = true -%}
     {%- endif -%}
-  {%- endif -%}
-  {%- if lookbook_is_draft -%}
+  {%- endunless -%}
+  {%- unless lookbook_is_draft -%}
+    {%- comment -%} Draft status can't be read in design_mode, so remind the merchant drafts stay hidden live. {%- endcomment -%}
     {%- if request.design_mode -%}
-      <div class="lookbook-draft-warning" role="status" style="padding: 16px; background: #FFF3CD; border: 1px solid #ffc107; color: #856404;">
-        This Lookbook is set to Draft — it will not appear on the live storefront. Change its status to Active to enable it.
-      </div>
+      <p class="page-width lookbook-design-note" role="note" style="margin: 0; padding: 8px 0; font-size: 11px; color: #6B6B6B;">
+        Note: Draft lookbooks won’t appear on the live storefront.
+      </p>
     {%- endif -%}
-  {%- else -%}
     <section
-      class="lookbook section-{{ section.id }}-lookbook"
+      class="page-width lookbook section-{{ section.id }}-lookbook"
       aria-label="Lookbook: {{ lookbook.title.value | escape }}"
     >
-      {%- comment -%} SectionBar — always rendered when Lookbook renders {%- endcomment -%}
-      <div class="lookbook__section-bar" aria-hidden="true">The Lookbook</div>
+      {%- comment -%} SectionBar — rendered when Lookbook renders, hidden when label blank {%- endcomment -%}
+      {%- if section.settings.label_section_bar != blank -%}
+        <div class="lookbook__section-bar" aria-hidden="true">{{ section.settings.label_section_bar | escape }}</div>
+      {%- endif -%}
 
       {%- comment -%} LookbookHero — only when hero_image field has a value (absent if no image) {%- endcomment -%}
       {%- assign hero_image = lookbook.hero_image.value -%}
@@ -53,7 +51,9 @@
             fetchpriority="low"
           >
           <div class="lookbook__hero-text">
-            <span class="lookbook__hero-eyebrow">The Edit</span>
+            {%- if section.settings.label_eyebrow != blank -%}
+              <span class="lookbook__hero-eyebrow">{{ section.settings.label_eyebrow | escape }}</span>
+            {%- endif -%}
             {%- assign heading_tag = section.settings.heading_level | default: 'h2' -%}
             <{{ heading_tag }} class="lookbook__hero-title">{{ lookbook.title.value | escape }}</{{ heading_tag }}>
             <span class="lookbook__hero-rule"></span>
@@ -69,7 +69,9 @@
       {%- assign product_count = products | size -%}
       {%- if product_count > 0 -%}
         <div class="lookbook__count-bar">
-          <span class="lookbook__count-label">Shop the Edit</span>
+          {%- if section.settings.label_shop != blank -%}
+            <span class="lookbook__count-label">{{ section.settings.label_shop | escape }}</span>
+          {%- endif -%}
           <span class="lookbook__count-number" aria-hidden="true">
             {%- if product_count < 10 -%}0{%- endif -%}{{ product_count }}
           </span>
@@ -80,7 +82,7 @@
             {%- capture badge_num -%}{%- if forloop.index < 10 -%}0{%- endif -%}{{ forloop.index }}{%- endcapture -%}
             <li class="lookbook__card-item" data-index="{{ badge_num }}">
               <a
-                class="card-product lookbook__card-link"
+                class="lookbook__card-link"
                 href="{{ product.url }}"
                 aria-label="{{ product.title | escape }}"
               >
@@ -103,7 +105,9 @@
                   {%- endif -%}
                   <h3 class="lookbook__card-title">{{ product.title | escape }}</h3>
                   <span class="lookbook__card-price">{{ product.price | money }}</span>
-                  <span class="lookbook__card-cta">View Product</span>
+                  {%- if section.settings.label_cta != blank -%}
+                    <span class="lookbook__card-cta">{{ section.settings.label_cta | escape }}</span>
+                  {%- endif -%}
                 </div>
               </a>
             </li>
@@ -113,12 +117,14 @@
         {%- comment -%} LookbookFooter — inside product guard: absent when 0 products (S-10) {%- endcomment -%}
         <div class="lookbook__footer">
           <span class="lookbook__footer-rule"></span>
-          <span class="lookbook__footer-label">End of Edit</span>
+          {%- if section.settings.label_footer != blank -%}
+            <span class="lookbook__footer-label">{{ section.settings.label_footer | escape }}</span>
+          {%- endif -%}
           <span class="lookbook__footer-rule"></span>
         </div>
       {%- endif -%}
     </section>
-  {%- endif -%}
+  {%- endunless -%}
 {% endif %}
 
 {% schema %}
@@ -142,6 +148,44 @@
         { "value": "h3", "label": "H3" }
       ],
       "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lookbook.settings.labels_header.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.lookbook.settings.labels_header.info"
+    },
+    {
+      "type": "text",
+      "id": "label_section_bar",
+      "label": "t:sections.lookbook.settings.label_section_bar.label",
+      "default": "The Lookbook"
+    },
+    {
+      "type": "text",
+      "id": "label_eyebrow",
+      "label": "t:sections.lookbook.settings.label_eyebrow.label",
+      "default": "The Edit"
+    },
+    {
+      "type": "text",
+      "id": "label_shop",
+      "label": "t:sections.lookbook.settings.label_shop.label",
+      "default": "Shop the Edit"
+    },
+    {
+      "type": "text",
+      "id": "label_cta",
+      "label": "t:sections.lookbook.settings.label_cta.label",
+      "default": "View Product"
+    },
+    {
+      "type": "text",
+      "id": "label_footer",
+      "label": "t:sections.lookbook.settings.label_footer.label",
+      "default": "End of Edit"
     }
   ],
   "presets": [
