@@ -1,0 +1,24 @@
+{% assign lookbook = section.settings.lookbook %}
+
+{% if lookbook %}
+  <p>{{ lookbook.title.value }} — Storefronts API Access: OK</p>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Lookbook",
+  "settings": [
+    {
+      "type": "metaobject",
+      "id": "lookbook",
+      "label": "Lookbook",
+      "metaobject_type": "lookbook"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook"
+    }
+  ]
+}
+{% endschema %}
