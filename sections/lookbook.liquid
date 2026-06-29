@@ -3,9 +3,9 @@
 {% if lookbook %}
   <section
     class="lookbook section-{{ section.id }}-lookbook"
-    aria-label="Lookbook: {{ lookbook.title.value }}"
+    aria-label="Lookbook: {{ lookbook.title.value | escape }}"
   >
-      <p>{{ lookbook.title.value }}</p>
+    <p>{{ lookbook.title.value }}</p>
   </section>
 {% endif %}
 
