@@ -141,6 +141,10 @@
   max-width: 280px;
 }
 
+.lookbook__hero-description p {
+  margin: 0;
+}
+
 /* ----------------------------------------------------------
    5. PRODUCT COUNT BAR
    ---------------------------------------------------------- */
@@ -302,7 +306,8 @@
 
   .lookbook .lookbook__card-image-col {
     width: 100%;
-    height: 360px;
+    height: auto;
+    aspect-ratio: 3 / 4;
   }
 
   .lookbook .lookbook__card-body {

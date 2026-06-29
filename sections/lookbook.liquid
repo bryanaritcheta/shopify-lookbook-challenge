@@ -3,85 +3,122 @@
 {% assign lookbook = section.settings.lookbook %}
 
 {% if lookbook %}
-  <section
-    class="lookbook section-{{ section.id }}-lookbook"
-    aria-label="Lookbook: {{ lookbook.title.value | escape }}"
-  >
-    {%- comment -%} SectionBar — always rendered when Lookbook renders {%- endcomment -%}
-    <div class="lookbook__section-bar" aria-hidden="true">The Lookbook</div>
+  {%- comment -%}
+    S-02 draft guard: a Draft metaobject entry still passes the lookbook truthy check (the
+    picker has a selection), but on the live storefront Shopify suppresses its field values —
+    which would otherwise render an empty SectionBar/count shell.
 
-    {%- comment -%} LookbookHero — only when hero_image field has a value (absent if no image) {%- endcomment -%}
-    {%- assign hero_image = lookbook.hero_image.value -%}
-    {%- if hero_image -%}
-      {%- assign hero_alt = hero_image.alt | default: lookbook.title.value | default: '' -%}
-      <div class="lookbook__hero">
-        <img
-          src="{{ hero_image | image_url: width: 1200 }}"
-          alt="{{ hero_alt | escape }}"
-          width="{{ hero_image.width }}"
-          height="{{ hero_image.height }}"
-          loading="lazy"
-          fetchpriority="low"
-        >
-        <div class="lookbook__hero-text">
-          <span class="lookbook__hero-eyebrow">The Edit</span>
-          {%- assign heading_tag = section.settings.heading_level | default: 'h2' -%}
-          <{{ heading_tag }} class="lookbook__hero-title">{{ lookbook.title.value | escape }}</{{ heading_tag }}>
-          <span class="lookbook__hero-rule"></span>
-          {%- if lookbook.description.value != blank -%}
-            <div class="lookbook__hero-description">{{ lookbook.description | metafield_tag }}</div>
-          {%- endif -%}
+    Detection is context-aware to avoid a catastrophic false positive. On the live storefront
+    Shopify suppresses a draft entry's field values, so a blank title.value is a reliable draft
+    signal and an active entry always has a populated title — this never hides a live active
+    Lookbook even if published_at is NOT exposed on the store's metaobject. In design_mode all
+    field values are accessible regardless of status, so title.value cannot distinguish draft
+    from active there; published_at (nil for drafts) drives the customizer warning banner.
+  {%- endcomment -%}
+  {%- assign lookbook_is_draft = false -%}
+  {%- if request.design_mode -%}
+    {%- if lookbook.published_at == blank -%}
+      {%- assign lookbook_is_draft = true -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- if lookbook.title.value == blank -%}
+      {%- assign lookbook_is_draft = true -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if lookbook_is_draft -%}
+    {%- if request.design_mode -%}
+      <div class="lookbook-draft-warning" role="status" style="padding: 16px; background: #FFF3CD; border: 1px solid #ffc107; color: #856404;">
+        This Lookbook is set to Draft — it will not appear on the live storefront. Change its status to Active to enable it.
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <section
+      class="lookbook section-{{ section.id }}-lookbook"
+      aria-label="Lookbook: {{ lookbook.title.value | escape }}"
+    >
+      {%- comment -%} SectionBar — always rendered when Lookbook renders {%- endcomment -%}
+      <div class="lookbook__section-bar" aria-hidden="true">The Lookbook</div>
+
+      {%- comment -%} LookbookHero — only when hero_image field has a value (absent if no image) {%- endcomment -%}
+      {%- assign hero_image = lookbook.hero_image.value -%}
+      {%- if hero_image -%}
+        {%- assign hero_alt = hero_image.alt | default: lookbook.title.value | default: '' -%}
+        <div class="lookbook__hero">
+          <img
+            src="{{ hero_image | image_url: width: 1200 }}"
+            alt="{{ hero_alt | escape }}"
+            width="{{ hero_image.width }}"
+            height="{{ hero_image.height }}"
+            loading="lazy"
+            fetchpriority="low"
+          >
+          <div class="lookbook__hero-text">
+            <span class="lookbook__hero-eyebrow">The Edit</span>
+            {%- assign heading_tag = section.settings.heading_level | default: 'h2' -%}
+            <{{ heading_tag }} class="lookbook__hero-title">{{ lookbook.title.value | escape }}</{{ heading_tag }}>
+            <span class="lookbook__hero-rule"></span>
+            {%- if lookbook.description.value != blank -%}
+              <div class="lookbook__hero-description">{{ lookbook.description | metafield_tag }}</div>
+            {%- endif -%}
+          </div>
         </div>
-      </div>
-    {%- endif -%}
+      {%- endif -%}
 
-    {%- comment -%} ProductCountBar + LookbookProductGrid — S-10: hidden when 0 products {%- endcomment -%}
-    {%- assign products = lookbook.products.value -%}
-    {%- assign product_count = products | size -%}
-    {%- if product_count > 0 -%}
-      <div class="lookbook__count-bar">
-        <span class="lookbook__count-label">Shop the Edit</span>
-        <span class="lookbook__count-number" aria-hidden="true">
-          {%- if product_count < 10 -%}0{%- endif -%}{{ product_count }}
-        </span>
-      </div>
+      {%- comment -%} ProductCountBar + LookbookProductGrid + LookbookFooter — S-10: hidden when 0 products {%- endcomment -%}
+      {%- assign products = lookbook.products.value -%}
+      {%- assign product_count = products | size -%}
+      {%- if product_count > 0 -%}
+        <div class="lookbook__count-bar">
+          <span class="lookbook__count-label">Shop the Edit</span>
+          <span class="lookbook__count-number" aria-hidden="true">
+            {%- if product_count < 10 -%}0{%- endif -%}{{ product_count }}
+          </span>
+        </div>
 
-      <ol class="lookbook__product-grid">
-        {%- for product in products -%}
-          {%- capture badge_num -%}{%- if forloop.index < 10 -%}0{%- endif -%}{{ forloop.index }}{%- endcapture -%}
-          <li class="lookbook__card-item" data-index="{{ badge_num }}">
-            <a
-              class="card-product lookbook__card-link"
-              href="{{ product.url }}"
-              aria-label="{{ product.title | escape }}"
-            >
-              <div class="lookbook__card-image-col">
-                {%- if product.featured_image -%}
-                  <img
-                    src="{{ product.featured_image | image_url: width: 600 }}"
-                    alt="{{ product.featured_image.alt | default: product.title | escape }}"
-                    width="{{ product.featured_image.width }}"
-                    height="{{ product.featured_image.height }}"
-                    loading="lazy"
-                  >
-                {%- else -%}
-                  {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
-                {%- endif -%}
-              </div>
-              <div class="lookbook__card-body">
-                {%- if product.type != blank -%}
-                  <span class="lookbook__card-category">{{ product.type | upcase }}</span>
-                {%- endif -%}
-                <h3 class="lookbook__card-title">{{ product.title | escape }}</h3>
-                <span class="lookbook__card-price">{{ product.price | money }}</span>
-                <span class="lookbook__card-cta">View Product</span>
-              </div>
-            </a>
-          </li>
-        {%- endfor -%}
-      </ol>
-    {%- endif -%}
-  </section>
+        <ol class="lookbook__product-grid">
+          {%- for product in products -%}
+            {%- capture badge_num -%}{%- if forloop.index < 10 -%}0{%- endif -%}{{ forloop.index }}{%- endcapture -%}
+            <li class="lookbook__card-item" data-index="{{ badge_num }}">
+              <a
+                class="card-product lookbook__card-link"
+                href="{{ product.url }}"
+                aria-label="{{ product.title | escape }}"
+              >
+                <div class="lookbook__card-image-col">
+                  {%- if product.featured_image -%}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 600 }}"
+                      alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                      width="{{ product.featured_image.width }}"
+                      height="{{ product.featured_image.height }}"
+                      loading="lazy"
+                    >
+                  {%- else -%}
+                    {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+                  {%- endif -%}
+                </div>
+                <div class="lookbook__card-body">
+                  {%- if product.type != blank -%}
+                    <span class="lookbook__card-category">{{ product.type | upcase }}</span>
+                  {%- endif -%}
+                  <h3 class="lookbook__card-title">{{ product.title | escape }}</h3>
+                  <span class="lookbook__card-price">{{ product.price | money }}</span>
+                  <span class="lookbook__card-cta">View Product</span>
+                </div>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ol>
+
+        {%- comment -%} LookbookFooter — inside product guard: absent when 0 products (S-10) {%- endcomment -%}
+        <div class="lookbook__footer">
+          <span class="lookbook__footer-rule"></span>
+          <span class="lookbook__footer-label">End of Edit</span>
+          <span class="lookbook__footer-rule"></span>
+        </div>
+      {%- endif -%}
+    </section>
+  {%- endif -%}
 {% endif %}
 
 {% schema %}

@@ -1,99 +1,86 @@
-# Dawn
+# Lookbook Theme
 
-[![Build status](https://github.com/shopify/dawn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shopify/dawn/actions/workflows/ci.yml?query=branch%3Amain)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?color=informational)](/.github/CONTRIBUTING.md)
+A [Dawn](https://github.com/Shopify/dawn)-based Shopify theme with a custom **Lookbook** section — an editorial, metaobject-driven product showcase.
 
-[Getting started](#getting-started) |
-[Staying up to date with Dawn changes](#staying-up-to-date-with-dawn-changes) |
-[Developer tools](#developer-tools) |
-[Contributing](#contributing) |
-[Code of conduct](#code-of-conduct) |
-[Theme Store submission](#theme-store-submission) |
-[License](#license)
+- **Store:** `lookbook-challenge.myshopify.com`
+- **Development theme ID:** `141439402087`
 
-Dawn represents a HTML-first, JavaScript-only-as-needed approach to theme development. It's Shopify's first source available theme with performance, flexibility, and [Online Store 2.0 features](https://www.shopify.com/partners/blog/shopify-online-store) built-in and acts as a reference for building Shopify themes.
+## The Lookbook section
 
-* **Web-native in its purest form:** Themes run on the [evergreen web](https://www.w3.org/2001/tag/doc/evergreen-web/). We leverage the latest web browsers to their fullest, while maintaining support for the older ones through progressive enhancement—not polyfills.
-* **Lean, fast, and reliable:** Functionality and design defaults to “no” until it meets this requirement. Code ships on quality. Themes must be built with purpose. They shouldn’t support each and every feature in Shopify.
-* **Server-rendered:** HTML must be rendered by Shopify servers using Liquid. Business logic and platform primitives such as translations and money formatting don’t belong on the client. Async and on-demand rendering of parts of the page is OK, but we do it sparingly as a progressive enhancement.
-* **Functional, not pixel-perfect:** The Web doesn’t require each page to be rendered pixel-perfect by each browser engine. Using semantic markup, progressive enhancement, and clever design, we ensure that themes remain functional regardless of the browser.
+[`sections/lookbook.liquid`](sections/lookbook.liquid) renders an editorial "Lookbook" backed by a `lookbook` **metaobject**. Styling lives in [`assets/lookbook.css`](assets/lookbook.css) (a self-contained design system, all rules scoped to `.lookbook`).
 
-You can find a more detailed version of our theme code principles in the [contribution guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md#theme-code-principles).
+### How it works
 
-## Getting started
-We recommend using Dawn as a starting point for theme development. [Learn more on Shopify.dev](https://shopify.dev/themes/getting-started/create).
+The section has one main setting — a metaobject picker (`lookbook`) — plus a `heading_level` select. It reads these fields off the selected metaobject entry:
 
-> If you're building a theme for the Shopify Theme Store, then you can use Dawn as a starting point. However, the theme that you submit needs to be [substantively different from Dawn](https://shopify.dev/themes/store/requirements#uniqueness) so that it provides added value for merchants. Learn about the [ways that you can use Dawn](https://shopify.dev/themes/tools/dawn#ways-to-use-dawn).
+| Field | Type | Renders as |
+| --- | --- | --- |
+| `title` | text | Hero title (`FIRST TRACKS`) |
+| `hero_image` | image | Full-bleed hero background (hero is omitted if empty) |
+| `description` | rich text | Hero description |
+| `products` | product list | Product card grid + count bar |
+| `published_at` | (system) | Draft guard — see below |
 
-Please note that the main branch may include code for features not yet released. The "stable" version of Dawn is available in the theme store.
+### Notes for maintainers
 
-## Staying up to date with Dawn changes
+- **Rich-text rendering:** `description` is a rich-text field. Output it with `{{ lookbook.description | metafield_tag }}`, **not** `{{ lookbook.description.value }}` — the `.value` form returns the raw AST and renders as a `{"type"=>"root"...}` hash on the page.
+- **Draft guard:** a metaobject entry set to *Draft* still passes the picker's truthy check, but Shopify suppresses its field values on the live storefront. The section checks `published_at == blank` and, in the theme editor only, shows a warning instead of an empty shell.
+- **Card height (desktop):** product card images use a fixed `height: 360px` at ≥990px rather than `aspect-ratio`, which otherwise blows the cards up to full-column height.
 
-Say you're building a new theme off Dawn but you still want to be able to pull in the latest changes, you can add a remote `upstream` pointing to this Dawn repository.
+## Local development
 
-1. Navigate to your local theme folder.
-2. Verify the list of remotes and validate that you have both an `origin` and `upstream`:
-```sh
-git remote -v
-```
-3. If you don't see an `upstream`, you can add one that points to Shopify's Dawn repository:
-```sh
-git remote add upstream https://github.com/Shopify/dawn.git
-```
-4. Pull in the latest Dawn changes into your repository:
-```sh
-git fetch upstream
-git pull upstream main
+Run a dev server that live-syncs your local files and reconciles editor content from the remote (recommended while iterating):
+
+```bash
+shopify theme dev --store lookbook-challenge --theme 141439402087
 ```
 
-## Developer tools
+Saving a file updates the preview at `http://127.0.0.1:9292` instantly — no manual push needed.
 
-There are a number of really useful tools that the Shopify Themes team uses during development. Dawn is already set up to work with these tools.
+## Uploading changes
 
-### Shopify CLI
+> ⚠️ A plain `shopify theme push` overwrites the JSON files that hold **page/editor content**
+> (`config/settings_data.json`, `templates/**/*.json`, `sections/*-group.json`), reverting
+> any content set in the theme editor. Use the helper below to avoid this.
 
-[Shopify CLI](https://github.com/Shopify/shopify-cli) helps you build Shopify themes faster and is used to automate and enhance your local development workflow. It comes bundled with a suite of commands for developing Shopify themes—everything from working with themes on a Shopify store (e.g. creating, publishing, deleting themes) or launching a development server for local theme development.
+To upload **code** without clobbering content, run:
 
-You can follow this [quick start guide for theme developers](https://shopify.dev/docs/themes/tools/cli) to get started.
+```bash
+./push.sh
+```
 
-### Theme Check
+[`push.sh`](push.sh) pushes everything except the content JSON files. To push a single file directly (always content-safe for `.liquid`/`assets`):
 
-We recommend using [Theme Check](https://github.com/shopify/theme-check) as a way to validate and lint your Shopify themes.
+```bash
+shopify theme push --theme 141439402087 --only "sections/lookbook.liquid"
+```
 
-We've added Theme Check to Dawn's [list of VS Code extensions](/.vscode/extensions.json) so if you're using Visual Studio Code as your code editor of choice, you'll be prompted to install the [Theme Check VS Code](https://marketplace.visualstudio.com/items?itemName=Shopify.theme-check-vscode) extension upon opening VS Code after you've forked and cloned Dawn.
+**Mental model:** `.liquid` + `assets/` + `config/settings_schema.json` = *code* (safe to push). `templates/**/*.json` + `config/settings_data.json` + `sections/*-group.json` = *content* (pushing these reverts editor work).
 
-You can also run it from a terminal with the following Shopify CLI command:
+## Linting
 
 ```bash
 shopify theme check
 ```
 
-### Continuous Integration
+---
 
-Dawn uses [GitHub Actions](https://github.com/features/actions) to maintain the quality of the theme. [This is a starting point](https://github.com/Shopify/dawn/blob/main/.github/workflows/ci.yml) and what we suggest to use in order to ensure you're building better themes. Feel free to build off of it!
+## About Dawn
 
-#### Shopify/lighthouse-ci-action
+This theme is built on Shopify's [Dawn](https://github.com/Shopify/dawn) reference theme (HTML-first, Online Store 2.0). Useful upstream references:
 
-We love fast websites! Which is why we created [Shopify/lighthouse-ci-action](https://github.com/Shopify/lighthouse-ci-action). This runs a series of [Google Lighthouse](https://developers.google.com/web/tools/lighthouse) audits for the home, product and collections pages on a store to ensure code that gets added doesn't degrade storefront performance over time.
+- [Shopify CLI for themes](https://shopify.dev/docs/themes/tools/cli)
+- [Theme Check](https://github.com/Shopify/theme-check)
+- [Dawn contribution guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md)
 
-#### Shopify/theme-check-action
+### Staying up to date with Dawn
 
-Dawn runs [Theme Check](#Theme-Check) on every commit via [Shopify/theme-check-action](https://github.com/Shopify/theme-check-action).
-
-## Contributing
-
-Want to make commerce better for everyone by contributing to Dawn? We'd love your help! Please read our [contributing guide](https://github.com/Shopify/dawn/blob/main/.github/CONTRIBUTING.md) to learn about our development process, how to propose bug fixes and improvements, and how to build for Dawn.
-
-## Code of conduct
-
-All developers who wish to contribute through code or issues, please first read our [Code of Conduct](https://github.com/Shopify/dawn/blob/main/.github/CODE_OF_CONDUCT.md).
-
-## Theme Store submission
-
-The [Shopify Theme Store](https://themes.shopify.com/) is the place where Shopify merchants find the themes that they'll use to showcase and support their business. As a theme partner, you can create themes for the Shopify Theme Store and reach an international audience of an ever-growing number of entrepreneurs.
-
-Ensure that you follow the list of [theme store requirements](https://shopify.dev/themes/store/requirements) if you're interested in becoming a [Shopify Theme Partner](https://themes.shopify.com/services/themes/guidelines) and building themes for the Shopify platform.
+```sh
+git remote add upstream https://github.com/Shopify/dawn.git
+git fetch upstream
+git pull upstream main
+```
 
 ## License
 
-Copyright (c) 2021-present Shopify Inc. See [LICENSE](/LICENSE.md) for further details.
+Copyright (c) 2021-present Shopify Inc. See [LICENSE](/LICENSE.md) for details.
