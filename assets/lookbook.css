@@ -179,16 +179,145 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  isolation: isolate;
 }
 
 /* ----------------------------------------------------------
    7. LOOKBOOK PRODUCT CARD
-   Overrides for Dawn's card-product snippet added in Story 2.4
+   Card HTML is inline in sections/lookbook.liquid.
+   Selectors use the .lookbook .lookbook__card-* family exclusively.
    ---------------------------------------------------------- */
 
-/* Story 2.4 adds: .lookbook .card-wrapper, .lookbook .card,
-   .lookbook .card__inner, .lookbook .card__media,
-   .lookbook .card__content overrides here */
+/* Ghost editorial index badge — reads data-index from <li> */
+.lookbook .lookbook__card-item {
+  position: relative;
+  list-style: none;
+}
+
+.lookbook .lookbook__card-item::before {
+  content: attr(data-index);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 28px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Card: single <a> wrapper — mobile horizontal layout */
+.lookbook .lookbook__card-link {
+  display: flex;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--lookbook-border);
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0;
+}
+
+/* Card image column (mobile) */
+.lookbook .lookbook__card-image-col {
+  width: 120px;
+  min-width: 120px;
+  height: 150px;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.lookbook .lookbook__card-image-col img,
+.lookbook .lookbook__card-image-col svg {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 0;
+}
+
+/* Card body column (mobile) */
+.lookbook .lookbook__card-body {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Category label */
+.lookbook .lookbook__card-category {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--lookbook-mid-grey);
+}
+
+/* Product title — 2-line clamp */
+.lookbook .lookbook__card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--lookbook-ink);
+  margin: 4px 0;
+}
+
+/* Price */
+.lookbook .lookbook__card-price {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lookbook-accent);
+}
+
+/* CTA — styled span inside the <a> wrapper */
+.lookbook .lookbook__card-cta {
+  display: block;
+  width: 100%;
+  padding: 9px 0;
+  text-align: center;
+  background: var(--lookbook-ink);
+  color: var(--lookbook-white);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  border-radius: 0;
+}
+
+/* Desktop card layout (≥990px): vertical */
+@media screen and (min-width: 990px) {
+  .lookbook .lookbook__card-link {
+    display: block;
+  }
+
+  .lookbook .lookbook__card-image-col {
+    width: 100%;
+    height: 360px;
+  }
+
+  .lookbook .lookbook__card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .lookbook .lookbook__card-cta {
+    padding: 12px 0;
+    margin-top: auto;
+  }
+}
 
 /* ----------------------------------------------------------
    8. LOOKBOOK FOOTER
@@ -227,7 +356,9 @@
 .lookbook__hero img,
 .lookbook__count-bar,
 .lookbook__product-grid,
-.lookbook__footer {
+.lookbook__footer,
+.lookbook .lookbook__card-link,
+.lookbook .lookbook__card-cta {
   border-radius: 0;
 }
 
