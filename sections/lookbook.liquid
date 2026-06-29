@@ -7,7 +7,35 @@
     class="lookbook section-{{ section.id }}-lookbook"
     aria-label="Lookbook: {{ lookbook.title.value | escape }}"
   >
-    <p>{{ lookbook.title.value }}</p>
+    {%- comment -%} SectionBar — always rendered when Lookbook renders {%- endcomment -%}
+    <div class="lookbook__section-bar" aria-hidden="true">The Lookbook</div>
+
+    {%- comment -%} LookbookHero — only when hero_image field has a value (absent if no image) {%- endcomment -%}
+    {%- assign hero_image = lookbook.hero_image.value -%}
+    {%- if hero_image -%}
+      {%- assign hero_alt = hero_image.alt | default: lookbook.title.value | default: '' -%}
+      <div class="lookbook__hero">
+        <img
+          src="{{ hero_image | image_url: width: 1200 }}"
+          alt="{{ hero_alt | escape }}"
+          width="{{ hero_image.width }}"
+          height="{{ hero_image.height }}"
+          loading="lazy"
+          fetchpriority="low"
+        >
+        <div class="lookbook__hero-text">
+          <span class="lookbook__hero-eyebrow">The Edit</span>
+          {%- assign heading_tag = section.settings.heading_level | default: 'h2' -%}
+          <{{ heading_tag }} class="lookbook__hero-title">{{ lookbook.title.value | escape }}</{{ heading_tag }}>
+          <span class="lookbook__hero-rule"></span>
+          {%- assign desc = lookbook.description.value -%}
+          {%- assign desc_text = desc | strip_html | strip -%}
+          {%- if desc_text != blank -%}
+            <div class="lookbook__hero-description">{{ desc }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
   </section>
 {% endif %}
 
