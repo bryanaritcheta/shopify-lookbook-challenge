@@ -1,0 +1,270 @@
+/* ============================================================
+   Lookbook Design System — Editorial Bold
+   Scope: all rules scoped to .lookbook or .section-lookbook
+   Dawn tokens: inherited, never redefined outside these scopes
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   1. COLOR TOKENS
+   ---------------------------------------------------------- */
+
+.lookbook {
+  --lookbook-ink: #0A0A0A;
+  --lookbook-surface: #F8F7F5;
+  --lookbook-white: #FFFFFF;
+  --lookbook-mid-grey: #6B6B6B;
+  --lookbook-border: #DEDEDE;
+  --lookbook-accent: #C41230;
+  --lookbook-charcoal: #1F1F1F;
+}
+
+/* ----------------------------------------------------------
+   2. LOOKBOOK SECTION CONTAINER
+   ---------------------------------------------------------- */
+
+.lookbook {
+  background: var(--lookbook-surface);
+  width: 100%;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* ----------------------------------------------------------
+   3. SECTION BAR
+   ---------------------------------------------------------- */
+
+.lookbook__section-bar {
+  display: flex;
+  align-items: center;
+  background: var(--lookbook-ink);
+  padding: 10px 20px;
+  color: var(--lookbook-white);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  border-radius: 0;
+}
+
+.lookbook__section-bar::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  background: var(--lookbook-accent);
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------
+   4. LOOKBOOK HERO
+   ---------------------------------------------------------- */
+
+.lookbook__hero {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
+}
+
+.lookbook__hero img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 0;
+}
+
+.lookbook__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.10) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+.lookbook__hero-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 20px 28px;
+  z-index: 2;
+}
+
+.lookbook__hero-eyebrow {
+  display: block;
+  color: var(--lookbook-accent);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.lookbook__hero-title {
+  display: block;
+  color: var(--lookbook-white);
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  line-height: 0.92;
+  margin: 0 0 16px;
+}
+
+.lookbook__hero-rule {
+  display: block;
+  width: 30px;
+  height: 2px;
+  background: var(--lookbook-accent);
+  margin-bottom: 12px;
+  border-radius: 0;
+}
+
+.lookbook__hero-description {
+  display: block;
+  color: rgba(255, 255, 255, 0.70);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+  max-width: 280px;
+}
+
+/* ----------------------------------------------------------
+   5. PRODUCT COUNT BAR
+   ---------------------------------------------------------- */
+
+.lookbook__count-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--lookbook-surface);
+  border-bottom: 1px solid var(--lookbook-border);
+  border-radius: 0;
+}
+
+.lookbook__count-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lookbook-ink);
+}
+
+.lookbook__count-number {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--lookbook-border);
+}
+
+/* ----------------------------------------------------------
+   6. PRODUCT GRID (mobile: vertical card stack)
+   ---------------------------------------------------------- */
+
+.lookbook__product-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ----------------------------------------------------------
+   7. LOOKBOOK PRODUCT CARD
+   Overrides for Dawn's card-product snippet added in Story 2.4
+   ---------------------------------------------------------- */
+
+/* Story 2.4 adds: .lookbook .card-wrapper, .lookbook .card,
+   .lookbook .card__inner, .lookbook .card__media,
+   .lookbook .card__content overrides here */
+
+/* ----------------------------------------------------------
+   8. LOOKBOOK FOOTER
+   ---------------------------------------------------------- */
+
+.lookbook__footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 20px;
+}
+
+.lookbook__footer-rule {
+  flex: 1;
+  height: 2px;
+  background: var(--lookbook-ink);
+  border-radius: 0;
+}
+
+.lookbook__footer-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lookbook-mid-grey);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   9. ZERO BORDER-RADIUS ENFORCEMENT
+   ---------------------------------------------------------- */
+
+.lookbook,
+.lookbook__section-bar,
+.lookbook__hero,
+.lookbook__hero img,
+.lookbook__count-bar,
+.lookbook__product-grid,
+.lookbook__footer {
+  border-radius: 0;
+}
+
+/* ----------------------------------------------------------
+   10. NO BOX-SHADOW ENFORCEMENT
+   ---------------------------------------------------------- */
+
+.lookbook *,
+.lookbook *::before,
+.lookbook *::after {
+  box-shadow: none !important;
+}
+
+/* ----------------------------------------------------------
+   11. DESKTOP OVERRIDES (min-width: 990px)
+   ---------------------------------------------------------- */
+
+@media screen and (min-width: 990px) {
+  .lookbook__hero {
+    height: 560px;
+  }
+
+  .lookbook__hero-title {
+    font-size: clamp(52px, 6vw, 72px);
+  }
+
+  .lookbook__hero-text {
+    padding: 0 40px 36px;
+  }
+
+  .lookbook__count-bar {
+    padding: 20px 40px;
+  }
+
+  .lookbook__footer {
+    padding: 24px 40px;
+  }
+
+  .section-lookbook .lookbook__product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+  }
+}
