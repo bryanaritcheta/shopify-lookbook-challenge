@@ -1655,6 +1655,9 @@
         }
       }
     },
+    "product-lookbooks": {
+      "name": "Product Lookbooks"
+    },
     "main-account": {
       "name": "Account"
     },

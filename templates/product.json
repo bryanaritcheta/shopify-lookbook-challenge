@@ -76,6 +76,9 @@
         "padding_bottom": 0
       }
     },
+    "product-lookbooks": {
+      "type": "product-lookbooks"
+    },
     "related-products": {
       "type": "related-products",
       "settings": {
@@ -98,6 +101,7 @@
   "order": [
     "main",
     "disclosures",
+    "product-lookbooks",
     "related-products"
   ]
 }

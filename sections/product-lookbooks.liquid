@@ -1,0 +1,30 @@
+{{ 'lookbook.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  sections/product-lookbooks.liquid — Product Page Auto-Discovery
+  Detection loop (shop.metaobjects.lookbook.values, limit: 250): Story 3.2.
+  Draft exclusion (AD-5): Story 3.3.
+  250-entry ceiling: AD-2 / ADR-001.
+{%- endcomment -%}
+
+{% schema %}
+{
+  "name": "t:sections.product-lookbooks.name",
+  "class": "section-product-lookbooks",
+  "settings": [
+    {
+      "type": "select",
+      "id": "heading_level",
+      "label": "t:sections.lookbook.settings.heading_level.label",
+      "options": [
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["product"]
+  }
+}
+{% endschema %}
