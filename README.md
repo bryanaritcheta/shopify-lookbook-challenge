@@ -103,7 +103,7 @@ shopify theme check
 
 - [x] **Repository** with the theme code — this repo
 - [x] **Store URL** where the Lookbooks can be viewed — `lookbook-challenge.myshopify.com`
-- [ ] **Metaobject configuration** — screenshots of the `lookbook` definition / admin access (provided alongside this submission)
+- [x] **Metaobject configuration** — screenshots of the `lookbook` definition / admin access (provided alongside this submission)
 
 ---
 
